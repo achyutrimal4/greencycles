@@ -99,49 +99,126 @@ ON a.city_id = ci.city_id
 GROUP BY city
 ORDER BY 1 DESC
 
--- Create an overview of the revenue (sum of amount) grouped by a column in the format "country, city".
+-- Create an overview of the revenue (sum of amount) grouped by a column in 
+-- the format "country, city".
 -- Question: Which country, city has the least sales?
 
+SELECT SUM(amount), country||','||' '||city AS city FROM payment p
+INNER JOIN customer c 
+ON p.customer_id = c.customer_id
+INNER JOIN address a 
+ON c.address_id = a.address_id
+INNER JOIN city ci 
+ON a.city_id = ci.city_id
+INNER JOIN country co
+ON ci.country_id = co.country_id
+GROUP BY 2
+ORDER BY 1
+
+
+-- Create a list with the average of the sales amount each staff_id 
+-- 	has per customer.
+-- Question: Which staff_id makes in average more revenue per customer?
+
+SELECT AVG(total), staff_id FROM(
+SELECT SUM(amount) as total, staff_id, customer_id 
+FROM payment
+GROUP BY customer_id, staff_id)
+GROUP BY staff_id
+
+-- Create a query that shows average daily revenue of all Sundays.
+-- Question: What is the daily average revenue of all Sundays?
+
+SELECT AVG(total) 
+	FROM (
+		SELECT SUM(amount) as total,
+		EXTRACT(DOW from payment_date) as sunday,
+		DATE(payment_date)
+		FROM payment
+		WHERE EXTRACT(DOW from payment_date) = 0
+		GROUP BY DATE(payment_date), sunday
+		)
 
 
 
 
+-- Create a list of movies - with their length and their replacement cost - 
+-- that are longer than the average length in each replacement cost group.
+-- Question: Which two movies are the shortest in that list and how long are they?
+
+SELECT 
+title,
+length
+FROM film f1
+WHERE length > (SELECT AVG(length) FROM film f2
+			   WHERE f1.replacement_cost=f2.replacement_cost)
+ORDER BY length ASC
+
+
+-- Create a list that shows how much the average customer spent in total 
+-- (customer life-time value) grouped by the different districts.
+-- Question: Which district has the highest average customer life-time value?
+
+SELECT district, AVG(total) FROM (
+SELECT SUM(amount) as total, district FROM payment p
+INNER JOIN customer c 
+ON p.customer_id = c.customer_id
+INNER JOIN address a 
+ON c.address_id = a.address_id
+GROUP BY district, p.customer_id)
+GROUP BY district
+ORDER BY 2 DESC
 
 
 
+-- Create a list that shows all payments including the payment_id, 
+-- amount and the film category (name) plus the total amount that 
+-- was made in this category. Order the results ascendingly by the 
+-- category (name) and as second order criterion by the payment_id ascendingly.
+-- Question: What is the total revenue of the category 'Action' and what is the lowest payment_id in that category 'Action'?
+
+SELECT payment_id, amount, name, (
+	SELECT SUM(amount) FROM payment p 
+INNER JOIN rental r
+ON p.rental_id = r.rental_id
+INNER JOIN inventory i 
+ON r.inventory_id = i.inventory_id
+INNER JOIN film f 
+ON i.film_id = f.film_id
+INNER JOIN film_category fc 
+ON f.film_id = fc.film_id
+INNER JOIN category c1
+ON c.category_id = fc.category_id
+	WHERE c1.name= c.name
+) FROM payment p
+INNER JOIN rental r
+ON p.rental_id = r.rental_id
+INNER JOIN inventory i 
+ON r.inventory_id = i.inventory_id
+INNER JOIN film f 
+ON i.film_id = f.film_id
+INNER JOIN film_category fc 
+ON f.film_id = fc.film_id
+INNER JOIN category c 
+ON c.category_id = fc.category_id
 
 
+-- Create a list with the top overall revenue of a film title 
+-- (sum of amount per title) for each category (name).
+-- Question: Which is the top performing film in the animation category?
 
 
+SELECT title, amount FROM payment p
+INNER JOIN rental r 
+ON p.rental_id = r.rental_id
+INNER JOIN inventory i 
+ON r.inventory_id = i.inventory_id	
+INNER JOIN film f 
+ON i.film_id = f.film_id
+INNER JOIN film_category fc 
+ON f.film_id = fc.category_id
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT * FROM inventory
 
 
 
