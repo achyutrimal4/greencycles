@@ -201,39 +201,3 @@ INNER JOIN film_category fc
 ON f.film_id = fc.film_id
 INNER JOIN category c 
 ON c.category_id = fc.category_id
-
-
--- Create a list with the top overall revenue of a film title 
--- (sum of amount per title) for each category (name).
--- Question: Which is the top performing film in the animation category?
-
-
-SELECT title, amount FROM payment p
-INNER JOIN rental r 
-ON p.rental_id = r.rental_id
-INNER JOIN inventory i 
-ON r.inventory_id = i.inventory_id	
-INNER JOIN film f 
-ON i.film_id = f.film_id
-INNER JOIN film_category fc 
-ON f.film_id = fc.category_id
-
-SELECT * FROM inventory
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
