@@ -85,8 +85,18 @@ INNER JOIN flights f
 ON tf.flight_id = f.flight_id
 
 
+/*
+Write a query that returns the running total of how late the flights are
+(difference between actual arrival and scheduled arrival ) orderd by flight_id
+including the departure airport
+*/
 
 
+SELECT flight_id, 
+departure_airport,
+SUM(actual_arrival-scheduled_arrival) 
+	OVER(PARTITION BY departure_airport ORDER BY flight_id )
+FROM flights
 
 
 
