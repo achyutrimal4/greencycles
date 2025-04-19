@@ -100,10 +100,27 @@ FROM flights
 
 
 
+/*
+Write a query that calculates the booking amount rollup for the hierarchy of
+quarter, month, week in month, day
+*/
 
+SELECT 'Q'||TO_CHAR(book_date, 'Q') as quarter,
+TO_CHAR(book_date, 'Month') as month,
+TO_CHAR(book_date,'w') as week_of_month,
+DATE(book_date) as day,
+SUM(total_amount)
+FROM bookings
+GROUP BY
+	ROLLUP(
+'Q'||TO_CHAR(book_date, 'Q'),
+TO_CHAR(book_date, 'Month'),
+TO_CHAR(book_date,'w'),
+DATE(book_date) 
+	)
+ORDER BY 1,2,3,4
 
-
-
+SELECT * FROM bookings
 
 
 
