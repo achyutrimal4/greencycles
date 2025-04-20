@@ -191,47 +191,131 @@ ON emp.manager_id = mng.emp_id
 
 
 
+/*
+Write a query that returns the average salaries for each positions with 
+appropriate roundings.
+*/
+
+SELECT * , ROUND(AVG(salary) OVER(PARTITION BY position_title),2)
+FROM employees
 
 
 
+/*
+What is the average salary for a Software Engineer in the company.
+*/
+
+SELECT ROUND(AVG(salary),2) FROM employees
+WHERE position_title = 'Software Engineer'
+
+/*
+Write a query that returns the average salaries per division.
+*/
+SELECT salary, division,
+	ROUND(AVG(salary) OVER(PARTITION BY division),2)
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id
+
+
+/*
+Write a query that returns the following:
+emp_id,
+first_name,
+last_name,
+position_title,
+salary
+and a column that returns the average salary for every job_position.
+Order the results by the emp_id.
+*/
+
+SELECT emp_id,
+first_name, 
+last_name, 
+position_title,
+salary,
+ROUND(AVG(salary) OVER(PARTITION BY position_title), 2)
+FROM employees
+ORDER BY 1
 
 
 
+/*
+How many people earn less than their avg_position_salary?
+Write a query that answers that question.
+Ideally the output just shows that number directly.
+*/
 
 
+SELECT first_name, last_name, salary
+FROM employees e1
+WHERE salary <(
+	SELECT AVG(salary) FROM employees e2
+	WHERE e1.position_title = e2.position_title
+)
 
 
+/*
+Write a query that returns a running total of the salary development 
+ordered by the start_date.
+In your calculation, disregard that fact that people have left the 
+company (write the query as if they were still working for the company).
+*/
 
 
+SELECT emp_id, salary, start_date, 
+SUM(salary) OVER(ORDER BY start_date)
+FROM employees
+
+/*
+Create the same running total but now also considder the fact that people 
+were leaving the company.
+*/
+
+SELECT 
+start_date,
+SUM(salary) OVER(ORDER BY start_date)
+FROM (
+SELECT 
+emp_id,
+salary,
+start_date
+FROM employees
+UNION 
+SELECT 
+emp_id,
+-salary,
+end_date
+FROM v_employees_info
+WHERE is_active ='false'
+ORDER BY start_date) a 
 
 
+/*
+Write a query that outputs only the top earner per position_title including 
+first_name and position_title and their salary.
+*/
 
+SELECT first_name, position_title, salary FROM 
+employees e1
+WHERE salary = (
+	SELECT MAX(salary) FROM employees e2
+	WHERE
+	e1.position_title = e2.position_title
+)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*
+Add also the average salary per position_title.
+*/
+SELECT first_name, position_title, salary,
+ROUND(AVG(salary) OVER(PARTITION BY position_title),2)
+FROM 
+employees e1
+WHERE salary = (
+	SELECT MAX(salary) FROM employees e2
+	WHERE
+	e1.position_title = e2.position_title
+)
 
 
 
